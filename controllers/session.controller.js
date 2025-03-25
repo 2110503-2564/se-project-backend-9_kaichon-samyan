@@ -84,7 +84,7 @@ exports.addSession = async (req,res,next)=>{
     try {
         const company = await Company.findById(req.params.CompanyId);
         if(!company){
-            return res.status(404).json({success:false,msg:'No company found'});
+            return res.status(404).json({success:false,message:'No company found'});
 
         }
         const interviewDate = req.body.sessionDate;
@@ -96,14 +96,14 @@ exports.addSession = async (req,res,next)=>{
         const existsess = await Session.find({user:req.user.id});
         req.body.user=req.user.id;
         if(req.user.role!=='admin'&&existsess.length>=3){
-            return res.status(400).json({success:false,msg:'User has exeed booking limit'});
+            return res.status(400).json({success:false,message:'User has exeed booking limit'});
         }
         const session = await Session.create(req.body);
         res.status(200).json({success:true,data:session});
 
     } catch (error) {
         console.log(error);
-        return res.status(500).json({success:false,msg:'Cannot create session'});
+        return res.status(500).json({success:false,message:'Cannot create session'});
     }
    
 };
