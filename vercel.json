@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "job fair",
+  "build": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "route": [
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
+  ]
+}
