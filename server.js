@@ -43,7 +43,7 @@ const swaggerOptions={
     },
     servers: [
       {
-        url:  process.env.HOST + '/api/v1'
+        url:  process.env.HOST + ':' + PORT + '/api/v1'
       }
     ],
   },
@@ -55,6 +55,6 @@ app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
 process.on('unhandledRejection', (err, Promise) => {
   console.log(`Error: ${err.message}`);
-
+  
   server.close(() => process.exit(1));
 })
