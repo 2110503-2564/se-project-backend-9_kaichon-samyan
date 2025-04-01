@@ -63,32 +63,191 @@ exports.logout = (req, res) => {
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
 
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const {name, tel} = req.body;
+    
+    const user = await User.findByIdAndUpdate(req.user.id, {
+      name,
+      tel
+    },
+    {
+      new: true //return updated document
+    });
+    
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(400).json({success : false, error});
+    console.log(err.stack); 
+  }
+}
+
+exports.changePassword = async (req, res) => {
+  try {
+    const {oldPassword, newPassword} = req.body;
+    
+    const user = await User.findById(req.user.id).select('+password');
+    const isPasswordMatch = await user.matchPassword(oldPassword);
+
+    if(!isPasswordMatch) {
+      res.status(401).json({success : false, error: "Password not match"});
+      return;
+    }
+    
+    user.password = newPassword;
+    await user.save();
+    
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(400).json({success : false, error});
+    console.log(error); 
+  }
+}
+
 const sendTokenResponse= (user , statusCode , res) => {
-    const token = user.getSignedJwtToken();
-    
-    const options = {
-        expires : new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE*24*60*60*1000) , 
-        httpOnly : true
-    };
-
-    if(process.env.NODE_ENV === 'production') {
-        options.secure = true ;
-    }
-    
-    const responseData = {
-      name: user.name,
-      email: user.email,
-      tel: user.tel,
-      role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      id: user._id
-    }
-
-    res.status(statusCode).cookie('jwt', token, options).json({success: true, token, user:responseData});
+  const token = user.getSignedJwtToken();
+  
+  const options = {
+    expires : new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE*24*60*60*1000) , 
+    httpOnly : true
+  };
+  
+  if(process.env.NODE_ENV === 'production') {
+    options.secure = true ;
+  }
+  
+  const responseData = {
+    name: user.name,
+    email: user.email,
+    tel: user.tel,
+    role: user.role,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+    id: user._id
+  }
+  
+  res.status(statusCode).cookie('jwt', token, options).json({success: true, token, user:responseData});
 }
 
 exports.getMe =async (req ,res , next) => {
-    const user = await User.findById(req.user.id);
-    res.status(200).json({success : true , data : user});
+  const user = await User.findById(req.user.id);
+  res.status(200).json({success : true , data : user});d
 };
+
+/**
+ * @swagger
+ * /api/v1/auth/updateProfile:
+ *   put:
+ *     summary: Update user profile
+ *     description: Allows a logged-in user to update their name and telephone number.
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: The new name of the user.
+ *               tel:
+ *                 type: string
+ *                 description: The new telephone number of the user.
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   type: object
+ *                   description: The updated user object.
+ *       400:
+ *         description: Bad request or validation error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   description: Error message.
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/changePassword:
+ *   put:
+ *     summary: Change user password
+ *     description: Allows a logged-in user to change their password.
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *                 description: The current password of the user.
+ *               newPassword:
+ *                 type: string
+ *                 description: The new password to be set.
+ *     responses:
+ *       200:
+ *         description: Password changed successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   type: object
+ *                   description: The user object after the password change.
+ *       400:
+ *         description: Bad request or validation error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   description: Error message.
+ *       401:
+ *         description: Unauthorized or incorrect current password.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   description: Error message.
+ */
