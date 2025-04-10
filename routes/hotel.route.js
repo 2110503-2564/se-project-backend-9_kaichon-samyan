@@ -1,6 +1,6 @@
 const express = require('express');
 const { authorize, protect } = require('../middlewares/auth.middlware');
-const { getHotels, getHotel, createHotel, deleteHotel } = require('../controllers/hotel.controller.js');
+const { getHotels, getHotel, createHotel, deleteHotel, ratingHotel, deleteRating } = require('../controllers/hotel.controller.js');
 
 const router = express.Router();
 
@@ -175,5 +175,110 @@ router.post('/', protect, authorize('admin'), createHotel);
  *               $ref: '#/components/schemas/Error'
  */
 router.delete('/:id', protect, authorize('admin'), deleteHotel);
+
+/**
+ * @swagger
+ * /hotels/{id}/rating:
+ *   put:
+ *     summary: Add or update a rating for a hotel
+ *     tags: [Hotels]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: MongoDB ID of the hotel to rate
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - score
+ *             properties:
+ *               score:
+ *                 type: number
+ *                 minimum: 0
+ *                 maximum: 5
+ *                 description: Rating score (0-5)
+ *               comment:
+ *                 type: string
+ *                 description: Optional review comment
+ *     responses:
+ *       200:
+ *         description: Rating added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Bad request or invalid rating score
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Not authorized - User must be logged in
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.put('/:id/rating', protect, ratingHotel);
+
+/**
+ * @swagger
+ * /hotels/{id}/rating/{ratingId}:
+ *   delete:
+ *     summary: Delete a rating from a hotel
+ *     tags: [Hotels]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: MongoDB ID of the hotel
+ *       - in: path
+ *         name: ratingId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: MongoDB ID of the rating to delete
+ *     responses:
+ *       200:
+ *         description: Rating deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Bad request or rating not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Not authorized - Must be rating owner or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.delete('/:id/rating/:ratingId', protect, deleteRating);
 
 module.exports = router;

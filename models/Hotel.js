@@ -22,6 +22,26 @@ const HotelSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please add a tel']
   },
+  rating: [
+    {
+      _id: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: () => new mongoose.Types.ObjectId()
+      },
+      score: {
+        type: Number,
+        required: true
+      },
+      comment: {
+        type: String,
+      },
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      }
+    }
+  ]
 })
 
 module.exports = mongoose.model('Hotel', HotelSchema);

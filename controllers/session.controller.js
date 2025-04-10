@@ -7,10 +7,10 @@ exports.getSessions = async (req, res) => {
     let sessions = null;
 
     if(user.role === "admin") {
-      sessions = await Session.find();
+      sessions = await Session.find().populate({ path: "user" }).populate({ path: 'hotel' });
     }
     else if (user.role === "user") {
-      sessions = await Session.find({ user: user.id });
+      sessions = await Session.find({ user: user.id }).populate({ path: "user" }).populate({ path: "hotel" });
     }
 
     res.status(200).json({ success: true, data: sessions});

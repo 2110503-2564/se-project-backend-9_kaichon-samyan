@@ -1,8 +1,9 @@
+const { TokenExpiredError } = require('jsonwebtoken');
 const Hotel = require('../models/Hotel');
 
 exports.getHotels = async (req, res) => {
   try {
-    const hotels = await Hotel.find();
+    const hotels = await Hotel.find().populate({ path: "rating.user" });
 
     res.status(200).json({ data: hotels });
   } catch (error) {
@@ -12,7 +13,7 @@ exports.getHotels = async (req, res) => {
 
 exports.getHotel = async (req, res) => {
   try {
-    const hotel = await Hotel.findById(req.params.id);
+    const hotel = await Hotel.findById(req.params.id).populate({ path: "rating.user"});
     
     res.status(200).json({ data: hotel });
   } catch (error) {
@@ -45,6 +46,73 @@ exports.deleteHotel = async (req, res) => {
     res.status(200).json({ success: true });
 
   } catch (error) {
+    res.status(400).json({ success: false });
+  }
+}
+
+exports.ratingHotel = async (req, res) => {
+  try {
+    const { id: hotelId } = req.params;
+    const { score, comment } = req.body;
+
+    if(!score) {
+      return res.status(400).json({ success: false, message: "Score is required. Please provide a valid score to proceed." });
+    }
+
+    const hotel = await Hotel.findById(hotelId);
+
+    hotel.rating.push({
+      score: score, 
+      comment: comment,
+      user: req.user.id
+    });
+
+    hotel.save();
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(400).json({ success: false });
+  }
+}
+
+exports.deleteRating = async (req, res) => {
+  try {
+    const user = req.user;
+    const { id: hotelId, ratingId } = req.params;
+
+    const hotel = await Hotel.findById(hotelId);
+
+    const rating = hotel.rating.find(rating => rating._id.toString() === ratingId);
+
+    if(user.role === "admin") {
+      await hotel.updateOne({
+        $pull: {
+          rating: {
+            _id: ratingId
+          }
+        }
+      })
+
+      res.status(200).json({ success: true });
+    }
+    else if(user.role === "user") {
+      if(rating.user.toString() !== user.id.toString()) {
+        return res.status(400).json({ success: false, message: "You are not owner of this rating" });
+      }
+
+      await hotel.updateOne({
+        $pull: {
+          rating: {
+            _id: ratingId
+          }
+        }
+      });
+
+      res.status(200).json({ success: true });
+    }
+    
+  } catch (error) {
+    console.log(error);
     res.status(400).json({ success: false });
   }
 }
