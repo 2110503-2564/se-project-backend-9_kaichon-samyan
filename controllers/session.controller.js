@@ -1,177 +1,105 @@
-const Company = require('../models/Company');
-const Session = require('../models/Session');
+const Session = require('../models/Session')
+const Hotel = require('../models/Hotel');
 
-exports.getSessions = async (req, res, next) => {
-    let query;
+exports.getSessions = async (req, res) => {
+  try {
+    const user = req.user;
+    let sessions = null;
 
-    if (req.user.role !== 'admin') {
-        query = Session.find({ user: req.user.id })
-            .populate({
-                path: 'company',
-                select: 'companyName address website tel'
-            })
-            .populate({
-                path: 'user', // If session references a user
-                select: 'name email'
-            });
-    } else {
-        if (req.params.CompanyId) {
-            query = Session.find({ company: req.params.CompanyId })
-                .populate({
-                    path: 'company',
-                    select: 'companyName address website tel'
-                })
-                .populate({
-                    path: 'user',
-                    select: 'name email'
-                });
-        } else {
-            query = Session.find()
-                .populate({
-                    path: 'company',
-                    select: 'companyName address website tel'
-                })
-                .populate({
-                    path: 'user',
-                    select: 'name email'
-                });
-        }
+    if(user.role === "admin") {
+      sessions = await Session.find();
+    }
+    else if (user.role === "user") {
+      sessions = await Session.find({ user: user.id });
     }
 
-    try {
-        const sessions = await query;
+    res.status(200).json({ success: true, data: sessions});
+  } catch (error) {
+    res.status(400).json({ success: false });
+  }
+}
 
-        res.status(200).json({
-            success: true,
-            count: sessions.length,
-            data: sessions
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success: false,
-            msg: 'Cannot find sessions'
-        });
+exports.createSession = async (req, res) => {
+  try {
+    const user = req.user;
+    const { hotelId, date } = req.body;
+
+    const hotel = await Hotel.findById(hotelId);
+    if(!hotel) {
+      return res.status(400).json({ success: false, message: "Hotel not found" });
     }
-};
 
-exports.getSession = async (req, res, next) => {
-    try {
-        const session = await Session.findById(req.params.id)
-            .populate({
-                path: 'company',
-                select: 'companyName address website tel'
-            })
-            .populate({
-                path: 'user',
-                select: 'name email'
-            });
-
-        if (!session) {
-            return res.status(400).json({ success: false, msg: 'Not found session' });
-        }
-
-        res.status(200).json({ success: true, data: session });
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ success: false, msg: 'Cannot find session' });
+    const sessionCount = await Session.find({user: user.id}).countDocuments();
+    if(sessionCount >=3 ) {
+      return res.status(400).json({ success: false, message: "You're already booking up to 3 sessions limit."})
     }
-};
 
+    const session = await Session.create({
+      hotel: hotelId,
+      user: user.id,
+      date: date
+    });
 
-exports.addSession = async (req,res,next)=>{
-    try {
-        const company = await Company.findById(req.params.CompanyId);
-        if(!company){
-            return res.status(404).json({success:false,message:'No company found'});
+    res.status(200).json({ success: true, data: session });
+  } catch (error) {
+    res.status(400).json({ success: false });
+  }
+}
 
-        }
-        const interviewDate = req.body.sessionDate;
-        if ((interviewDate > '2022-05-13' || interviewDate < '2022-05-10')) {
-            return res.status(400).json({ message: "Invalid date range." });
-          }
-        
-        req.body.company = req.params.CompanyId;
-        const existsess = await Session.find({user:req.user.id});
-        req.body.user=req.user.id;
-        if(req.user.role!=='admin'&&existsess.length>=3){
-            return res.status(400).json({success:false,message:'User has exeed booking limit'});
-        }
-        const session = await Session.create(req.body);
-        res.status(200).json({success:true,data:session});
+exports.updateSession = async (req, res) => {
+  try {
+    const user = req.user;
+    const { id: sessionId } = req.params;
+    const { date } = req.body;
 
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({success:false,message:'Cannot create session'});
+    if(user.role === "admin") {
+      const session = await Session.findByIdAndUpdate(sessionId, 
+        { date: date },
+        { new: true }
+      );
+
+      res.status(200).json({ success: true, data: session });
     }
-   
-};
+    else if (user.role === "user") {
+      const session = Session.findById(sessionId);
 
-exports.updateSession = async (req,res,next )=>{
-    try {
-        const interviewDate = req.body.sessionDate;
-        if (interviewDate > '2022-05-13' || interviewDate < '2022-05-10') {
-            return res.status(400).json({ message: "Invalid date range." });
-        }
+      if(session.user !== user.id) {
+        return res.status(401).json({ success: false, message: "You're not owner of this session" });
+      }
+      
+      session = await Session.findByIdAndUpdate(sessionId, 
+        { date: date },
+        { new: true }
+      );
 
-        let session = await Session.findById(req.params.id);
-        if(!session) return res.status(400).json({success:false,msg:'No session with this id'});
-        if(session.user.toString()!==req.user.id&&req.user.role !=='admin'){
-            return res.status(401).json({
-                success:false,msg:'User is not authorized'
-            });
-        }
-        session = await Session.findByIdAndUpdate(req.params.id,req.body,{
-            new:true,
-            runValidators :true
-        });
-        res.status(200).json({
-            success:true,
-            data:session
-        });
-        
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success:false,
-            msge:'Cannot update'
-        });
+      res.status(200).json({ success: true, data: session });
     }
-};
+  } catch (error) {
+    res.status(400).json({ success: false });
+  }
+}
 
-exports.deleteSession = async (req,res,next)=>{
-    try {
-        const session = await Session.findById(req.params.id);
-        if(!session) {
-            return res.status(400).json({
-                success:false,
-                msg:'No session with this id'
-            });
-        }
-        if(session.user.toString()!==req.user.id&&req.user.role !=='admin'){
-            return res.status(401).json({
-                success:false,msg:'User is not authorized'
-            });
-        }
+exports.deleteSession = async (req, res) => {
+  try {
+    const user = req.user;
+    const { id: sessionId } = req.params;
 
-        await session.deleteOne();
-        res.status(200).json({
-            success:true,
-            data :{}
-        })
-        
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success:false,
-            msg:'cannot delete'
-        });
-        
+    if(user.role === "admin") {
+      await Session.findOneAndDelete(sessionId);
+
+      res.status(200).json({ success: true });
     }
-};
+    else if (user.role === "user") {
+      const session = await Session.findById(sessionId);
 
+      if(session.id !== user.id) {
+        return res.status(401).json({ success: false, message: "You're not owner of this session" });
+      }
 
-
-
-
+      await Session.findByIdAndDelete(sessionId);
+      return res.status(200).json({ success: true });
+    }
+  } catch (error) {
+    res.status(400).json({ success: false });
+  }
+}

@@ -1,185 +1,220 @@
 const express = require('express');
-const { getSessions, getSession, addSession, updateSession, deleteSession } = require('../controllers/session.controller');
-
-const router = express.Router({ mergeParams: true });
 const { protect } = require('../middlewares/auth.middlware');
-
-router.route('/').get(protect, getSessions).post(protect, addSession);
-router.route('/:id').get(protect, getSession).put(protect, updateSession).delete(protect, deleteSession);
+const {getSessions, createSession, updateSession, deleteSession } = require('../controllers/session.controller');
 
 /**
  * @swagger
  * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
  *   schemas:
  *     Session:
  *       type: object
- *       required:
- *         - company
- *         - user
- *         - sessionDate
  *       properties:
- *         id:
+ *         hotel:
  *           type: string
- *           format: uuid
- *           description: The auto-generated id of the session
- *           example: d290f1ee-6c54-4b01-90e6-d701748f0851
- *         company:
- *           type: string
- *           format: uuid
- *           description: Company id
+ *           description: MongoDB ID of the hotel
  *         user:
  *           type: string
- *           format: uuid
- *           description: User id
- *         sessionDate:
+ *           description: MongoDB ID of the user
+ *         date:
  *           type: string
  *           format: date-time
- *           description: Date of the session
+ *           description: Date and time of the session
  *         createdAt:
  *           type: string
  *           format: date-time
- *           description: Date of session creation
- *
- * security:
- *   - bearerAuth: []
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
  */
+
+const router = express.Router()
 
 /**
  * @swagger
- * tags:
- *   name: Sessions
- *   description: API for managing sessions
- */
-
-/**
- * @swagger
- * /session:
+ * /sessions:
  *   get:
  *     summary: Get all sessions
+ *     tags: [Sessions]
  *     security:
  *       - bearerAuth: []
- *     tags: [Sessions]
  *     responses:
  *       200:
  *         description: List of all sessions
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Session'
- */
-
-/**
- * @swagger
- * /session/{id}:
- *   get:
- *     summary: Get a session by ID
- *     security:
- *       - bearerAuth: []
- *     tags: [Sessions]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: The session ID
- *     responses:
- *       200:
- *         description: The session details
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Session'
+ *       400:
+ *         description: Bad request
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Session'
- *       404:
- *         description: Session not found
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Not authorized to access this route
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
+router.get('/', protect, getSessions);
 
 /**
  * @swagger
- * /session:
+ * /sessions:
  *   post:
  *     summary: Create a new session
+ *     tags: [Sessions]
  *     security:
  *       - bearerAuth: []
- *     tags: [Sessions]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Session'
+ *             type: object
+ *             required:
+ *               - hotelId
+ *               - date
+ *             properties:
+ *               hotelId:
+ *                 type: string
+ *                 description: MongoDB ID of the hotel
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Date and time of the session
  *     responses:
- *       201:
+ *       200:
  *         description: Session created successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Session'
- *       500:
- *         description: Server error
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Session'
+ *       400:
+ *         description: Bad request or validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Not authorized to access this route
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
+router.post('/', protect, createSession);
 
 /**
  * @swagger
- * /session/{id}:
+ * /sessions/{id}:
  *   put:
- *     summary: Update a session by ID
+ *     summary: Update a session
+ *     tags: [Sessions]
  *     security:
  *       - bearerAuth: []
- *     tags: [Sessions]
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The session ID
+ *         description: MongoDB ID of the session
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Session'
+ *             type: object
+ *             required:
+ *               - date
+ *             properties:
+ *               date:
+ *                 type: string
+ *                 format: date-time
+ *                 description: New date and time for the session
  *     responses:
  *       200:
  *         description: Session updated successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Session'
- *       404:
- *         description: Session not found
- *       500:
- *         description: Server error
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   $ref: '#/components/schemas/Session'
+ *       400:
+ *         description: Bad request or validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Not authorized - must be session owner or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
+router.put('/:id', protect, updateSession);
 
 /**
  * @swagger
- * /session/{id}:
+ * /sessions/{id}:
  *   delete:
- *     summary: Delete a session by ID
+ *     summary: Delete a session
+ *     tags: [Sessions]
  *     security:
  *       - bearerAuth: []
- *     tags: [Sessions]
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
- *         required: true
- *         description: The session ID
+ *         description: MongoDB ID of the session to delete
  *     responses:
  *       200:
  *         description: Session deleted successfully
- *       404:
- *         description: Session not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: Bad request or session not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Not authorized - must be session owner or admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
+router.delete('/:id', protect, deleteSession);
 
 module.exports = router;

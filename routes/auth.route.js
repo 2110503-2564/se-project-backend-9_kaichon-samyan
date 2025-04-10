@@ -48,7 +48,21 @@
  *         token:
  *           type: string
  *           description: JWT authentication token
+ *     Error:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: false
+ *         message:
+ *           type: string
+ *           description: Error message
  */
+
+const express = require('express');
+const { register, login, logout, getMe, updateProfile, changePassword } = require('../controllers/auth.controller');
+const router = express.Router();
+const { protect } = require('../middlewares/auth.middlware');
 
 /**
  * @swagger
@@ -70,28 +84,38 @@
  *             properties:
  *               name:
  *                 type: string
- *                 example: John Doe
  *               email:
  *                 type: string
  *                 format: email
- *                 example: johndoe@example.com
  *               password:
  *                 type: string
  *                 format: password
- *                 example: mysecurepassword
  *               tel:
  *                 type: string
- *                 example: "123-456-7890"
+ *                 pattern: ^\d{3}-\d{3}-\d{4}$
  *     responses:
  *       201:
- *         description: Successfully registered
+ *         description: User registered successfully
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AuthResponse'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
  *       400:
- *         description: Bad request (missing fields or user already exists)
+ *         description: Invalid input or user already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
+router.post('/register', register);
 
 /**
  * @swagger
@@ -112,46 +136,67 @@
  *               email:
  *                 type: string
  *                 format: email
- *                 example: johndoe@example.com
  *               password:
  *                 type: string
  *                 format: password
- *                 example: mysecurepassword
  *     responses:
  *       200:
- *         description: Successfully logged in
+ *         description: Login successful
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AuthResponse'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
  *       400:
  *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
+router.post('/login', login);
 
 /**
  * @swagger
  * /auth/logout:
  *   post:
- *     summary: Logout user (clear JWT cookie)
+ *     summary: Logout user
  *     tags: [Auth]
  *     responses:
  *       200:
  *         description: Successfully logged out
- *       400:
- *         description: Logout failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Logged out successfully
  */
+router.post('/logout', logout);
 
 /**
  * @swagger
  * /auth/me:
  *   get:
- *     summary: Get logged-in user details
+ *     summary: Get current user profile
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Successfully retrieved user info
+ *         description: User profile retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -163,8 +208,13 @@
  *                 data:
  *                   $ref: '#/components/schemas/User'
  *       401:
- *         description: Unauthorized (invalid or missing token)
+ *         description: Not authorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
+router.get('/me', protect, getMe);
 
 /**
  * @swagger
@@ -183,17 +233,12 @@
  *             properties:
  *               name:
  *                 type: string
- *                 example: Jane Doe
- *               email:
- *                 type: string
- *                 format: email
- *                 example: janedoe@example.com
  *               tel:
  *                 type: string
- *                 example: "987-654-3210"
+ *                 pattern: ^\d{3}-\d{3}-\d{4}$
  *     responses:
  *       200:
- *         description: Successfully updated profile
+ *         description: Profile updated successfully
  *         content:
  *           application/json:
  *             schema:
@@ -202,13 +247,16 @@
  *                 success:
  *                   type: boolean
  *                   example: true
- *                 data:
+ *                 user:
  *                   $ref: '#/components/schemas/User'
- *       400:
- *         description: Bad request (validation error or missing fields)
  *       401:
- *         description: Unauthorized (invalid or missing token)
+ *         description: Not authorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
+router.put('/update', protect, updateProfile);
 
 /**
  * @swagger
@@ -225,20 +273,18 @@
  *           schema:
  *             type: object
  *             required:
- *               - currentPassword
+ *               - oldPassword
  *               - newPassword
  *             properties:
- *               currentPassword:
+ *               oldPassword:
  *                 type: string
  *                 format: password
- *                 example: oldpassword123
  *               newPassword:
  *                 type: string
  *                 format: password
- *                 example: newsecurepassword
  *     responses:
  *       200:
- *         description: Successfully changed password
+ *         description: Password changed successfully
  *         content:
  *           application/json:
  *             schema:
@@ -247,23 +293,15 @@
  *                 success:
  *                   type: boolean
  *                   example: true
- *       400:
- *         description: Bad request (validation error or incorrect current password)
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
  *       401:
- *         description: Unauthorized (invalid or missing token)
+ *         description: Current password is incorrect
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
-
-const express = require('express');
-const { register, login, logout, getMe, updateProfile, changePassword } = require('../controllers/auth.controller');
-
-const router = express.Router();
-const { protect } = require('../middlewares/auth.middlware');
-
-router.post('/register', register);
-router.post('/login', login);
-router.post('/logout', logout);
-router.get('/me', protect, getMe);
-router.put('/update', protect, updateProfile);
 router.put('/changepassword', protect, changePassword);
 
 module.exports = router;
