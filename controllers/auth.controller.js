@@ -135,6 +135,31 @@ exports.getMe =async (req ,res , next) => {
   res.status(200).json({success : true , data : user});d
 };
 
+exports.addProfilePic = async (req, res) => {
+  try {
+    let { newProfilePic } = req.body;
+  
+    const userId = req.user.id;
+    let user = await User.findById(userId);
+
+    if(user.profileImg) {
+      // ลบรูปเก่า
+      await cloudinary.uploader.destroy(user.profileImg.split("/").pop().split(".")[0]);
+    }
+
+    const uploadedResponse = await cloudinary.uploader.upload(newProfilePic);
+    newProfilePic = uploadedResponse.secure_url;
+
+    user.profileImg = newProfilePic;
+    await user.save();
+
+    return res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(400).json({success : false, error});
+    console.log(error); 
+  }
+}
+
 /**
  * @swagger
  * /api/v1/auth/updateProfile:
@@ -250,4 +275,53 @@ exports.getMe =async (req ,res , next) => {
  *                 error:
  *                   type: string
  *                   description: Error message.
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/addProfilePic:
+ *   put:
+ *     summary: Add or update user profile picture
+ *     description: Allows a logged-in user to add or update their profile picture using cloudinary
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newProfilePic:
+ *                 type: string
+ *                 description: Base64 encoded image string
+ *     responses:
+ *       200:
+ *         description: Profile picture updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   type: object
+ *                   description: The updated user object
+ *       400:
+ *         description: Bad request or upload error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   description: Error message
  */

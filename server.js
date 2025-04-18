@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db.js');
+const cloudinary = require('cloudinary').v2;
 
 const authRoute = require('./routes/auth.route.js');
 const hotelRoute = require('./routes/hotel.route.js');
@@ -14,6 +15,12 @@ const cors = require('cors')
 dotenv.config({path: './config/config.env'});
 
 connectDB();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 

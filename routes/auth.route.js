@@ -60,7 +60,7 @@
  */
 
 const express = require('express');
-const { register, login, logout, getMe, updateProfile, changePassword } = require('../controllers/auth.controller');
+const { register, login, logout, getMe, updateProfile, changePassword, addProfilePic } = require('../controllers/auth.controller');
 const router = express.Router();
 const { protect } = require('../middlewares/auth.middlware');
 
@@ -303,5 +303,53 @@ router.put('/update', protect, updateProfile);
  *               $ref: '#/components/schemas/Error'
  */
 router.put('/changepassword', protect, changePassword);
+
+/**
+ * @swagger
+ * /auth/addProfilePic:
+ *   put:
+ *     summary: Add or update profile picture
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - newProfilePic
+ *             properties:
+ *               newProfilePic:
+ *                 type: string
+ *                 description: Base64 encoded image string
+ *     responses:
+ *       200:
+ *         description: Profile picture updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Upload error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Not authorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.put('/addProfilePic', protect, addProfilePic);
 
 module.exports = router;
