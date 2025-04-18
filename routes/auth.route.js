@@ -315,7 +315,7 @@ router.put('/changepassword', protect, changePassword);
  *     requestBody:
  *       required: true
  *       content:
- *         multipart/form-data:
+ *         application/json:
  *           schema:
  *             type: object
  *             required:
@@ -323,8 +323,9 @@ router.put('/changepassword', protect, changePassword);
  *             properties:
  *               newProfilePic:
  *                 type: string
- *                 format: binary
- *                 description: Image file to upload
+ *                 pattern: ^data:image\/(jpeg|png|gif);base64,[A-Za-z0-9+/]+={0,2}$
+ *                 description: Base64 encoded image string in format "data:image/jpeg;base64,${base64Str}"
+ *                 example: "data:image/jpeg;base64,/9j/4AAQSkZJRg..."
  *     responses:
  *       200:
  *         description: Profile picture updated successfully
