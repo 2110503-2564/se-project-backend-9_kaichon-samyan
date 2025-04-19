@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "hotel",
   "builds": [
     {
@@ -8,6 +8,14 @@
     }
   ],
   "routes": [
+    {
+      "src": "/api-docs/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api/v1/(.*)",
+      "dest": "/server.js"
+    },
     {
       "src": "/(.*)",
       "dest": "/server.js"

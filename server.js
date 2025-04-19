@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db.js');
 const cloudinary = require('cloudinary').v2;
+const path = require('path');
 
 const authRoute = require('./routes/auth.route.js');
 const hotelRoute = require('./routes/hotel.route.js');
@@ -43,18 +44,18 @@ const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
     info: {
-      title: 'Job Fair API',
+      title: 'Hotel Booking API',
       version: '1.0.0',
-      description: 'API documentation for the Job Fair application',
+      description: 'API documentation for the Hotel Booking application',
       contact: {
         name: 'API Support',
-        email: 'support@jobfair.com'
+        email: 'support@hotelbooking.com'
       }
     },
     servers: [
       {
-        url: process.env.HOST + ':' + PORT + '/api/v1',
-        description: 'Development server'
+        url: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/api/v1` : `http://localhost:${PORT}/api/v1`,
+        description: process.env.VERCEL_URL ? 'Production server' : 'Development server'
       }
     ],
     components: {
@@ -154,7 +155,21 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
+
+// Serve Swagger UI from a specific path
+app.use('/api-docs', swaggerUI.serve);
+app.get('/api-docs', swaggerUI.setup(swaggerDocs, {
+  explorer: true,
+  customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css'
+}));
+
+// Add basic route for API root
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Welcome to Hotel Booking API',
+    documentation: '/api-docs'
+  });
+});
 
 process.on('unhandledRejection', (err, Promise) => {
   console.log(`Error: ${err.message}`);
