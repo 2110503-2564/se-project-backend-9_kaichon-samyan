@@ -4,14 +4,14 @@ const cookieParser = require('cookie-parser');
 const connectDB = require('./config/db.js');
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
+const swaggerUiDist = require('swagger-ui-dist');
+const cors = require('cors');
 
 const authRoute = require('./routes/auth.route.js');
 const hotelRoute = require('./routes/hotel.route.js');
 const sessionRoute = require('./routes/session.route.js');
-
-const swaggerJsDoc = require('swagger-jsdoc');
-const swaggerUI = require('swagger-ui-express');
-const cors = require('cors')
 
 dotenv.config({path: './config/config.env'});
 
@@ -57,98 +57,6 @@ const swaggerOptions = {
         url: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/api/v1` : `http://localhost:${PORT}/api/v1`,
         description: process.env.VERCEL_URL ? 'Production server' : 'Development server'
       }
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT'
-        }
-      },
-      schemas: {
-        User: {
-          type: 'object',
-          properties: {
-            name: {
-              type: 'string',
-              description: 'User full name'
-            },
-            email: {
-              type: 'string',
-              format: 'email',
-              description: 'User email address'
-            },
-            tel: {
-              type: 'string',
-              description: 'User phone number in format XXX-XXX-XXXX'
-            },
-            role: {
-              type: 'string',
-              enum: ['user', 'admin'],
-              description: 'User role'
-            },
-            password: {
-              type: 'string',
-              format: 'password',
-              description: 'User password (min 6 characters)'
-            }
-          }
-        },
-        Hotel: {
-          type: 'object',
-          properties: {
-            hotelName: {
-              type: 'string',
-              description: 'Name of the hotel'
-            },
-            address: {
-              type: 'string',
-              description: 'Hotel physical address'
-            },
-            website: {
-              type: 'string',
-              format: 'uri',
-              description: 'Hotel website URL'
-            },
-            description: {
-              type: 'string',
-              description: 'Hotel description'
-            },
-            tel: {
-              type: 'string',
-              description: 'Hotel contact number'
-            }
-          }
-        },
-        Error: {
-          type: 'object',
-          properties: {
-            success: {
-              type: 'boolean',
-              example: false
-            },
-            message: {
-              type: 'string'
-            }
-          }
-        }
-      }
-    },
-    tags: [
-      {
-        name: 'Auth',
-        description: 'Authentication endpoints'
-      },
-      {
-        name: 'Hotels',
-        description: 'Hotel management endpoints'
-      }
-    ],
-    security: [
-      {
-        bearerAuth: []
-      }
     ]
   },
   apis: ['./routes/*.js']
@@ -156,12 +64,26 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-// Serve Swagger UI from a specific path
+// Serve Swagger UI
 app.use('/api-docs', swaggerUI.serve);
-app.get('/api-docs', swaggerUI.setup(swaggerDocs, {
-  explorer: true,
-  customCssUrl: 'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css'
-}));
+app.get('/api-docs', (req, res) => {
+  let html = swaggerUI.generateHTML(swaggerDocs, {
+    customSiteTitle: "Hotel Booking API Documentation",
+    customfavIcon: "/assets/favicon.ico",
+    customCssUrl: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.3/swagger-ui.min.css'
+    ],
+    customJs: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.3/swagger-ui-bundle.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.3/swagger-ui-standalone-preset.min.js'
+    ]
+  });
+  
+  res.send(html);
+});
+
+// Serve Swagger UI assets
+app.use('/api-docs/swagger-ui', express.static(swaggerUiDist.getAbsoluteFSPath()));
 
 // Add basic route for API root
 app.get('/', (req, res) => {
