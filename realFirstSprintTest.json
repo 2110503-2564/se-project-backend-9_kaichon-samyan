@@ -1,0 +1,291 @@
+{
+	"info": {
+		"_postman_id": "2e5e062d-a1dd-414c-9273-6389ae90e139",
+		"name": "SE",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38264728"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"TOKEN\",pm.response.json().token)",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": "JSON Type",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"admin@admin.com\",\n  \"password\": \"admin\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/v1/auth/login",
+					"protocol" : "http",
+					"host": ["localhost"],
+					"port" : "5000" ,
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAll",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/v1/hotels",
+					"protocol" : "http",
+					"host": ["localhost"],
+					"port" : "5000" ,
+					"path": [
+						"api",
+						"v1",
+						"hotels"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Rating",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.environment.set(\"MockRating\",pm.response.json().token)",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": "JSON Type",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"score\" : \"5\",\n    \"comment\" : \"Very best Very best hotel\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/v1/hotels/:hotelID/rating",
+					"protocol" : "http",
+					"host": ["localhost"],
+					"port" : "5000" ,
+					"path": [
+						"api",
+						"v1",
+						"hotels",
+						":hotelID",
+						"rating"
+					],
+					"variable": [
+						{
+							"key": "hotelID",
+							"value": "6803644ba3e8084f243e5560"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Rating ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/v1/hotels/:ID/rating/:ratingID",
+					"protocol" : "http",
+					"host": ["localhost"],
+					"port" : "5000" ,
+					"path": [
+						"api",
+						"v1",
+						"hotels",
+						":ID",
+						"rating",
+						":ratingID"
+					],
+					"variable": [
+						{
+							"key": "ID",
+							"value": "6803644ba3e8084f243e5560"
+						},
+						{
+							"key": "ratingID",
+							"value": "680389e0c03d3f4369d14a1e"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update  rating",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": "JSON Type",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"newScore\": 5,\n  \"newComment\": \"i think it not decent a all (i changed my mind)\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/v1/hotels/:hoteID/rating/:ratingID",
+					"protocol" : "http",
+					"host": ["localhost"],
+					"port" : "5000" ,
+					"path": [
+						"api",
+						"v1",
+						"hotels",
+						":hoteID",
+						"rating",
+						":ratingID"
+					],
+					"variable": [
+						{
+							"key": "hoteID",
+							"value": "6803644ba3e8084f243e5560"
+						},
+						{
+							"key": "ratingID",
+							"value": "680389e0c03d3f4369d14a1e"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

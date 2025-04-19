@@ -13,6 +13,10 @@ const authRoute = require('./routes/auth.route.js');
 const hotelRoute = require('./routes/hotel.route.js');
 const sessionRoute = require('./routes/session.route.js');
 
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUI = require('swagger-ui-express');
+const cors = require('cors');
+
 dotenv.config({path: './config/config.env'});
 
 connectDB();
@@ -34,12 +38,6 @@ app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/hotels", hotelRoute);
 app.use("/api/v1/sessions", sessionRoute);
 
-const PORT=process.env.PORT || 5000;
-
-const server = app.listen(PORT, () => {
-  console.log('Server running in ', process.env.NODE_ENV, ' mode on port ', {PORT});
-});
-
 const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
@@ -54,47 +52,38 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/api/v1` : `http://localhost:${PORT}/api/v1`,
-        description: process.env.VERCEL_URL ? 'Production server' : 'Development server'
+        url: process.env.HOST + ':' + process.env.PORT + '/api/v1',
+        description: 'Development server'
       }
-    ]
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT'
+        }
+      }
+    }
   },
   apis: ['./routes/*.js']
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocs));
 
-// Serve Swagger UI
-app.use('/api-docs', swaggerUI.serve);
-app.get('/api-docs', (req, res) => {
-  let html = swaggerUI.generateHTML(swaggerDocs, {
-    customSiteTitle: "Hotel Booking API Documentation",
-    customfavIcon: "/assets/favicon.ico",
-    customCssUrl: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.3/swagger-ui.min.css'
-    ],
-    customJs: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.3/swagger-ui-bundle.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.18.3/swagger-ui-standalone-preset.min.js'
-    ]
+if (process.env.NODE_ENV !== 'test') {
+  // start the server only in non-test environment
+  const server = app.listen(process.env.PORT || 5000, () => {
+    console.log('Server running on port', process.env.PORT || 5000);
   });
-  
-  res.send(html);
-});
+}
 
-// Serve Swagger UI assets
-app.use('/api-docs/swagger-ui', express.static(swaggerUiDist.getAbsoluteFSPath()));
-
-// Add basic route for API root
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Welcome to Hotel Booking API',
-    documentation: '/api-docs'
-  });
-});
-
-process.on('unhandledRejection', (err, Promise) => {
+process.on('unhandledRejection', (err, promise) => {
   console.log(`Error: ${err.message}`);
-  
-  server.close(() => process.exit(1));
-})
+  if (process.env.NODE_ENV !== 'test') {
+    server.close(() => process.exit(1));
+  }
+});
+
+module.exports = app;  // Export the app for testing
