@@ -1,5 +1,5 @@
-const { TokenExpiredError } = require('jsonwebtoken');
 const Hotel = require('../models/Hotel');
+const mongoose = require('mongoose');
 
 exports.getHotels = async (req, res) => {
   try {
@@ -71,6 +71,55 @@ exports.ratingHotel = async (req, res) => {
 
     res.status(200).json({ success: true });
   } catch (error) {
+    res.status(400).json({ success: false });
+  }
+}
+
+exports.changeRating = async (req, res) => {
+  try {
+    const user = req.user;
+    const { id: hotelId, ratingId } = req.params;
+    const { newComment, newScore } = req.body;
+
+    const hotel = await Hotel.findById(hotelId);
+    const rating = hotel.rating.find(rating => rating._id.toString() === ratingId);
+
+    if(user.role === "admin") {
+      await Hotel.updateOne(
+        { _id: hotelId, "rating._id": ratingId },
+        {
+          $set: {
+            "rating.$[elem].comment": newComment,
+            "rating.$[elem].score": newScore
+          }
+        },
+        {
+          arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(ratingId) }]
+        }
+      );
+    }
+    else if(user.role === "user") {
+      if(rating.user.toString() !== user.id.toString()) {
+        return res.status(400).json({ success: false, message: "You are not owner of this rating" });
+      }
+
+      await Hotel.updateOne(
+        { _id: hotelId, "rating._id": ratingId },
+        {
+          $set: {
+            "rating.$[elem].comment": newComment,
+            "rating.$[elem].score": newScore
+          }
+        },
+        {
+          arrayFilters: [{ "elem._id": new mongoose.Types.ObjectId(ratingId) }]
+        }
+      );
+    }
+    
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.log(error);
     res.status(400).json({ success: false });
   }
 }
