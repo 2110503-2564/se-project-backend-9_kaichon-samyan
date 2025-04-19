@@ -5,7 +5,6 @@ const connectDB = require('./config/db.js');
 const cloudinary = require('cloudinary').v2;
 const path = require('path');
 const swaggerJsDoc = require('swagger-jsdoc');
-const swaggerUI = require('swagger-ui-express');
 const swaggerUiDist = require('swagger-ui-dist');
 const cors = require('cors');
 
@@ -13,9 +12,7 @@ const authRoute = require('./routes/auth.route.js');
 const hotelRoute = require('./routes/hotel.route.js');
 const sessionRoute = require('./routes/session.route.js');
 
-const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUI = require('swagger-ui-express');
-const cors = require('cors');
 
 dotenv.config({path: './config/config.env'});
 
@@ -37,6 +34,8 @@ app.use(cors());
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/hotels", hotelRoute);
 app.use("/api/v1/sessions", sessionRoute);
+
+const PORT = process.env.PORT;
 
 const swaggerOptions = {
   swaggerDefinition: {
