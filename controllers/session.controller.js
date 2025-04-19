@@ -62,9 +62,9 @@ exports.updateSession = async (req, res) => {
       res.status(200).json({ success: true, data: session });
     }
     else if (user.role === "user") {
-      const session = Session.findById(sessionId);
+      let session = await Session.findById(sessionId);
 
-      if(session.user !== user.id) {
+      if(session.user.toString() !== user.id) {
         return res.status(401).json({ success: false, message: "You're not owner of this session" });
       }
       
@@ -79,6 +79,7 @@ exports.updateSession = async (req, res) => {
       res.status(200).json({ success: true, data: session });
     }
   } catch (error) {
+    console.log(error);  
     res.status(400).json({ success: false });
   }
 }
@@ -96,7 +97,8 @@ exports.deleteSession = async (req, res) => {
     else if (user.role === "user") {
       const session = await Session.findById(sessionId);
 
-      if(session.id !== user.id) {
+      if(session.user.toString() !== user.id) {
+        // console.log(session.user.toString(), user.id)
         return res.status(401).json({ success: false, message: "You're not owner of this session" });
       }
 
