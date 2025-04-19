@@ -12,7 +12,11 @@ const SessionSchema = new monggose.Schema({
     ref: "User",
     required: true
   },
-  date: {
+  checkIn: {
+    type: Date,
+    required: true
+  },
+  checkOut: {
     type: Date,
     required: true
   }

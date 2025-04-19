@@ -22,7 +22,7 @@ exports.getSessions = async (req, res) => {
 exports.createSession = async (req, res) => {
   try {
     const user = req.user;
-    const { hotelId, date } = req.body;
+    const { hotelId, checkIn, checkOut } = req.body;
 
     const hotel = await Hotel.findById(hotelId);
     if(!hotel) {
@@ -37,7 +37,8 @@ exports.createSession = async (req, res) => {
     const session = await Session.create({
       hotel: hotelId,
       user: user.id,
-      date: date
+      checkIn: checkIn,
+      checkOut: checkOut
     });
 
     res.status(200).json({ success: true, data: session });
@@ -50,7 +51,7 @@ exports.updateSession = async (req, res) => {
   try {
     const user = req.user;
     const { id: sessionId } = req.params;
-    const { date } = req.body;
+    const { checkIn, checkOut } = req.body;
 
     if(user.role === "admin") {
       const session = await Session.findByIdAndUpdate(sessionId, 
@@ -68,7 +69,10 @@ exports.updateSession = async (req, res) => {
       }
       
       session = await Session.findByIdAndUpdate(sessionId, 
-        { date: date },
+        { 
+          checkIn: checkIn,
+          checkOut: checkOut
+         },
         { new: true }
       );
 

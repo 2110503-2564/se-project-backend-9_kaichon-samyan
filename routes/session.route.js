@@ -15,10 +15,14 @@ const {getSessions, createSession, updateSession, deleteSession } = require('../
  *         user:
  *           type: string
  *           description: MongoDB ID of the user
- *         date:
+ *         checkIn:
  *           type: string
  *           format: date-time
- *           description: Date and time of the session
+ *           description: Check-in date and time
+ *         checkOut:
+ *           type: string
+ *           format: date-time
+ *           description: Check-out date and time
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -83,15 +87,20 @@ router.get('/', protect, getSessions);
  *             type: object
  *             required:
  *               - hotelId
- *               - date
+ *               - checkIn
+ *               - checkOut
  *             properties:
  *               hotelId:
  *                 type: string
  *                 description: MongoDB ID of the hotel
- *               date:
+ *               checkIn:
  *                 type: string
  *                 format: date-time
- *                 description: Date and time of the session
+ *                 description: Check-in date and time
+ *               checkOut:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Check-out date and time
  *     responses:
  *       200:
  *         description: Session created successfully
@@ -142,12 +151,17 @@ router.post('/', protect, createSession);
  *           schema:
  *             type: object
  *             required:
- *               - date
+ *               - checkIn
+ *               - checkOut
  *             properties:
- *               date:
+ *               checkIn:
  *                 type: string
  *                 format: date-time
- *                 description: New date and time for the session
+ *                 description: New check-in date and time
+ *               checkOut:
+ *                 type: string
+ *                 format: date-time
+ *                 description: New check-out date and time
  *     responses:
  *       200:
  *         description: Session updated successfully
