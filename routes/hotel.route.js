@@ -179,7 +179,7 @@ router.delete('/:id', protect, authorize('admin'), deleteHotel);
 /**
  * @swagger
  * /hotels/{id}/rating:
- *   put:
+ *   post:
  *     summary: Add or update a rating for a hotel
  *     tags: [Hotels]
  *     security:
@@ -232,7 +232,7 @@ router.delete('/:id', protect, authorize('admin'), deleteHotel);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put('/:id/rating', protect, ratingHotel);
+router.post('/:id/rating', protect, ratingHotel);
 
 /**
  * @swagger
