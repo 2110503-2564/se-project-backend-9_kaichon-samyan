@@ -55,7 +55,10 @@ exports.updateSession = async (req, res) => {
 
     if(user.role === "admin") {
       const session = await Session.findByIdAndUpdate(sessionId, 
-        { date: date },
+        { 
+          checkIn: checkIn,
+          checkOut: checkOut
+        },
         { new: true }
       );
 
