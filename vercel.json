@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "name": "job fair",
+  "version": 1,
+  "name": "hotel",
   "builds": [
     {
       "src": "server.js",
