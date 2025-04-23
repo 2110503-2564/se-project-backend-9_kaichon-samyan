@@ -58,6 +58,13 @@ exports.ratingHotel = async (req, res) => {
     if(!score) {
       return res.status(400).json({ success: false, message: "Score is required. Please provide a valid score to proceed." });
     }
+    
+    if(score<0){
+      return res.status(400).json({success : false , message : "score cannot be negative (lowerbound)"});
+    }
+    if(score>5){
+      return res.status(400).json({success : false , message : "score cannot be more than 5 (upperbound)"});
+    }
 
     const hotel = await Hotel.findById(hotelId);
 
@@ -80,6 +87,13 @@ exports.changeRating = async (req, res) => {
     const user = req.user;
     const { id: hotelId, ratingId } = req.params;
     const { newComment, newScore } = req.body;
+
+    if(newScore<0){
+      return res.status(400).json({success : false , message : "score cannot be negative (lowerbound)"});
+    }
+    if(newScore>5){
+      return res.status(400).json({success : false , message : "score cannot be more than 5 (upperbound)"});
+    }
 
     const hotel = await Hotel.findById(hotelId);
     const rating = hotel.rating.find(rating => rating._id.toString() === ratingId);
