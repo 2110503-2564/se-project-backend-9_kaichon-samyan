@@ -60,7 +60,7 @@
  */
 
 const express = require('express');
-const { register, login, logout, getMe, updateProfile, changePassword, addProfilePic } = require('../controllers/auth.controller');
+const { register, login, logout, getMe, updateProfile, changePassword, uploadProfilePic, deleteProfilePic } = require('../controllers/auth.controller');
 const router = express.Router();
 const { protect } = require('../middlewares/auth.middlware');
 
@@ -306,7 +306,7 @@ router.put('/changepassword', protect, changePassword);
 
 /**
  * @swagger
- * /auth/addProfilePic:
+ * /auth/uploadProfilePic:
  *   put:
  *     summary: Add or update profile picture
  *     tags: [Auth]
@@ -352,6 +352,40 @@ router.put('/changepassword', protect, changePassword);
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put('/addProfilePic', protect, addProfilePic);
+router.put('/uploadProfilePic', protect, uploadProfilePic);
+
+/**
+ * @swagger
+ * /auth/deleteProfilePic:
+ *   delete:
+ *     summary: Delete user profile picture
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Profile picture deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         description: User doesn't have a profile picture
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       401:
+ *         description: Not authorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.delete('/deleteProfilePic', protect, deleteProfilePic);
 
 module.exports = router;

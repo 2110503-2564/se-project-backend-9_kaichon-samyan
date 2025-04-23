@@ -130,20 +130,12 @@ const sendTokenResponse = (user, statusCode, res) => {
     options.secure = true;
   }
 
-  const responseData = {
-    name: user.name,
-    email: user.email,
-    tel: user.tel,
-    role: user.role,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-    id: user._id,
-  };
+  user.password = undefined;
 
   res
     .status(statusCode)
     .cookie("jwt", token, options)
-    .json({ success: true, token, user: responseData });
+    .json({ success: true, token, user });
 };
 
 exports.getMe = async (req, res, next) => {
@@ -151,7 +143,7 @@ exports.getMe = async (req, res, next) => {
   res.status(200).json({ success: true, data: user });
 };
 
-exports.addProfilePic = async (req, res) => {
+exports.uploadProfilePic = async (req, res) => {
   try {
     let { newProfilePic } = req.body;
 
@@ -162,7 +154,7 @@ exports.addProfilePic = async (req, res) => {
       // ลบรูปเก่า
       await cloudinary.uploader.destroy(
         user.profileImg.split("/").pop().split(".")[0]
-      );
+      , { invalidate: true });
     }
 
     const uploadedResponse = await cloudinary.uploader.upload(newProfilePic);
@@ -184,6 +176,38 @@ exports.addProfilePic = async (req, res) => {
     console.log(error);
   }
 };
+
+//TODO change profile pic, delete profile pic
+
+exports.deleteProfilePic = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (user.profileImg) {
+      // ลบรูปเก่า
+      await cloudinary.uploader.destroy(
+        user.profileImg.split("/").pop().split(".")[0]
+      , { invalidate: true });
+    }
+    else {
+      return res.status(400).json({ success: false, error: "User don't have profileImg" });
+    }
+
+    // user.profileImg = "";
+    // await user.save();
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { profileImg: "" },
+      { new: true }
+    );
+
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ success: false, error });
+  }
+}
 
 /**
  * @swagger
