@@ -13,6 +13,7 @@ const authRoute = require('./routes/auth.route.js');
 const hotelRoute = require('./routes/hotel.route.js');
 const sessionRoute = require('./routes/session.route.js');
 const { default: rateLimit } = require('express-rate-limit');
+const { default: helmet } = require('helmet');
 
 dotenv.config({path: './config/config.env'});
 
@@ -35,6 +36,7 @@ const limiter = rateLimit({
 })
 
 app.use(limiter);
+app.use(helmet());
 app.use(express.json({limit: "5mb"}));
 app.use(express.json());
 app.use(cookieParser());
