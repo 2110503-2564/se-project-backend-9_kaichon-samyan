@@ -12,6 +12,7 @@ const cors = require('cors');
 const authRoute = require('./routes/auth.route.js');
 const hotelRoute = require('./routes/hotel.route.js');
 const sessionRoute = require('./routes/session.route.js');
+const { default: rateLimit } = require('express-rate-limit');
 
 dotenv.config({path: './config/config.env'});
 
@@ -25,6 +26,15 @@ cloudinary.config({
 
 const app = express();
 
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 นาที
+  max: 20,                 // จำกัด 20 requests ต่อ IP
+  message: 'คุณส่งคำขอมากเกินไป โปรดลองใหม่ภายหลัง',
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+app.use(limiter);
 app.use(express.json({limit: "5mb"}));
 app.use(express.json());
 app.use(cookieParser());
