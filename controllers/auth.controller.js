@@ -84,6 +84,7 @@ exports.updateProfile = async (req, res) => {
       },
       {
         new: true, //return updated document
+        runValidators: true
       }
     );
 
@@ -349,100 +350,4 @@ exports.addUsername = async (req, res) => {
  *                   description: Error message.
  */
 
-/**
- * @swagger
- * /api/v1/auth/addProfilePic:
- *   put:
- *     summary: Add or update user profile picture
- *     description: Allows a logged-in user to add or update their profile picture using cloudinary
- *     tags:
- *       - Auth
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               newProfilePic:
- *                 type: string
- *                 description: Base64 encoded image string
- *     responses:
- *       200:
- *         description: Profile picture updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 user:
- *                   type: object
- *                   description: The updated user object
- *       400:
- *         description: Bad request or upload error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   description: Error message
- */
-/**
- * @swagger
- * /api/v1/auth/addUsername:
- *   put:
- *     summary: Add or update username
- *     description: Allows a logged-in user to add or update their username
- *     tags:
- *       - Auth
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               newUsername:
- *                 type: string
- *                 description: The new username to assign to the user
- *     responses:
- *       200:
- *         description: Username updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 user:
- *                   type: object
- *                   description: The updated user object
- *       400:
- *         description: Bad request or update error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   description: Error message
- */
 
