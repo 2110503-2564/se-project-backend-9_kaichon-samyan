@@ -209,6 +209,29 @@ exports.deleteProfilePic = async (req, res) => {
   }
 }
 
+exports.addUsername = async (req, res) => {
+  try {
+    let { newUsername } = req.body;
+
+    const userId = req.user.id;
+
+    const updatedUser =  await User.findByIdAndUpdate(
+      userId,
+      {
+        username: newUsername,
+      },
+      {
+        new: true,
+      }
+    );
+
+    return res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    res.status(400).json({ success: false, error });
+    console.log(error);
+  }
+}
+
 /**
  * @swagger
  * /api/v1/auth/updateProfile:
@@ -374,3 +397,52 @@ exports.deleteProfilePic = async (req, res) => {
  *                   type: string
  *                   description: Error message
  */
+/**
+ * @swagger
+ * /api/v1/auth/addUsername:
+ *   put:
+ *     summary: Add or update username
+ *     description: Allows a logged-in user to add or update their username
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newUsername:
+ *                 type: string
+ *                 description: The new username to assign to the user
+ *     responses:
+ *       200:
+ *         description: Username updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   type: object
+ *                   description: The updated user object
+ *       400:
+ *         description: Bad request or update error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+

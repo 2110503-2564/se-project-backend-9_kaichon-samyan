@@ -35,6 +35,9 @@
  *           enum: [user, admin]
  *           default: user
  *           description: User role
+ *         username:
+ *           type: string
+ *           description: username of user
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -60,7 +63,7 @@
  */
 
 const express = require('express');
-const { register, login, logout, getMe, updateProfile, changePassword, uploadProfilePic, deleteProfilePic } = require('../controllers/auth.controller');
+const { register, login, logout, getMe, updateProfile, changePassword, uploadProfilePic, deleteProfilePic, addUsername } = require('../controllers/auth.controller');
 const router = express.Router();
 const { protect } = require('../middlewares/auth.middlware');
 
@@ -387,5 +390,54 @@ router.put('/uploadProfilePic', protect, uploadProfilePic);
  *               $ref: '#/components/schemas/Error'
  */
 router.delete('/deleteProfilePic', protect, deleteProfilePic);
+/**
+ * @swagger
+ * /auth/addUsername:
+ *   put:
+ *     summary: Add or update username
+ *     description: Allows a logged-in user to add or update their username
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               newUsername:
+ *                 type: string
+ *                 description: The new username to assign to the user
+ *     responses:
+ *       200:
+ *         description: Username updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   type: object
+ *                   description: The updated user object
+ *       400:
+ *         description: Bad request or update error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ */
+router.put('/addUsername', protect, addUsername);
 
 module.exports = router;
