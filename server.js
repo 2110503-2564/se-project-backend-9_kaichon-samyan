@@ -38,11 +38,32 @@ const limiter = rateLimit({
 
 app.use(xss());
 app.use(limiter);
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://cdnjs.cloudflare.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https:", "data:"],
+      connectSrc: ["'self'", "https:"]
+    }
+  },
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 app.use(express.json({limit: "5mb"}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
+
+// Add MIME type handling for Swagger UI CSS
+app.use('/api-docs', (req, res, next) => {
+  if (req.url.endsWith('.css')) {
+    res.type('text/css');
+  }
+  next();
+});
 
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/hotels", hotelRoute);
