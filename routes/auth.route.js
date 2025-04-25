@@ -298,7 +298,7 @@ router.put('/update', protect, updateProfile);
  *                   example: true
  *                 user:
  *                   $ref: '#/components/schemas/User'
- *       401:
+ *       400:
  *         description: Current password is incorrect
  *         content:
  *           application/json:

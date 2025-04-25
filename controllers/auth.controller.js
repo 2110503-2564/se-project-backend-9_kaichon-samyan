@@ -103,7 +103,7 @@ exports.changePassword = async (req, res) => {
     const isPasswordMatch = await user.matchPassword(oldPassword);
 
     if (!isPasswordMatch) {
-      res.status(401).json({ success: false, error: "Password not match" });
+      res.status(400).json({ success: false, error: "Password not match" });
       return;
     }
 
