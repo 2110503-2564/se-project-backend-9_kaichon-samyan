@@ -406,6 +406,8 @@ router.delete('/deleteProfilePic', protect, deleteProfilePic);
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - newUsername
  *             properties:
  *               newUsername:
  *                 type: string
@@ -434,10 +436,14 @@ router.delete('/deleteProfilePic', protect, deleteProfilePic);
  *                 success:
  *                   type: boolean
  *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "you told me you want to (add,edit) username but right now you don't provide anything!"
  *                 error:
  *                   type: string
- *                   description: Error message
+ *                   description: Optional error message from the server
  */
+
 router.put('/addUsername', protect, addUsername);
 
 /**

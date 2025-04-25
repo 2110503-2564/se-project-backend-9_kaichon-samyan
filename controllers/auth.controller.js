@@ -214,6 +214,10 @@ exports.addUsername = async (req, res) => {
   try {
     let { newUsername } = req.body;
 
+    if(!newUsername){
+      return res.status(400).json({success : false , message : "you told me you want to (add,edit) username but right now you don't provide anything!"})
+    }
+
     const userId = req.user.id;
 
     const updatedUser =  await User.findByIdAndUpdate(
