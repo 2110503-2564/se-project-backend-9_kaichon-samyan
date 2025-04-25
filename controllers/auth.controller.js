@@ -239,155 +239,40 @@ exports.addUsername = async (req, res) => {
 
 exports.getAllUser = async (req, res) => {
   try {
-      const users = await User.find();
-  
-      res.status(200).json({ data: users });
-    } catch (error) {
-      res.status(400).json({ success: false });
-    }
-  }
-  
-  exports.deleteUserPic = async (req, res) => {
-    try {
-      const userId = req.body;
-      const user = await User.findById(userId);
+    const users = await User.find();
 
-      if(user.profileImg) {
-        await cloudinary.uploader.destroy(
-          user.profileImg.split("/").pop().split(".")[0]
-        , { invalidate: true });
-      }
-      else {
-        return res.status(400).json({ success: false, message: "user does not have profile img" });
-      }
-
-      const updatedUser = await User.findByIdAndUpdate(userId,
-        { profileImg: "" },
-        { new: true }
-      );
-
-      res.status(200).json({ success: true, user: updatedUser });
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ success: false });
+    res.status(200).json({ data: users });
+  } catch (error) {
+    res.status(400).json({ success: false });
   }
 }
+  
+exports.deleteUserPic = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await User.findById(userId);
 
-/**
- * @swagger
- * /api/v1/auth/updateProfile:
- *   put:
- *     summary: Update user profile
- *     description: Allows a logged-in user to update their name and telephone number.
- *     tags:
- *       - Auth
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 description: The new name of the user.
- *               tel:
- *                 type: string
- *                 description: The new telephone number of the user.
- *     responses:
- *       200:
- *         description: Profile updated successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 user:
- *                   type: object
- *                   description: The updated user object.
- *       400:
- *         description: Bad request or validation error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   description: Error message.
- */
+    if(!user) {
+      return res.status(400).json({ success: false, message: "user not found" });
+    }
 
-/**
- * @swagger
- * /api/v1/auth/changePassword:
- *   put:
- *     summary: Change user password
- *     description: Allows a logged-in user to change their password.
- *     tags:
- *       - Auth
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               oldPassword:
- *                 type: string
- *                 description: The current password of the user.
- *               newPassword:
- *                 type: string
- *                 description: The new password to be set.
- *     responses:
- *       200:
- *         description: Password changed successfully.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 user:
- *                   type: object
- *                   description: The user object after the password change.
- *       400:
- *         description: Bad request or validation error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   description: Error message.
- *       401:
- *         description: Unauthorized or incorrect current password.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 error:
- *                   type: string
- *                   description: Error message.
- */
+    if(user.profileImg) {
+      await cloudinary.uploader.destroy(
+        user.profileImg.split("/").pop().split(".")[0]
+      , { invalidate: true });
+    }
+    else {
+      return res.status(400).json({ success: false, message: "user does not have profile img" });
+    }
 
+    const updatedUser = await User.findByIdAndUpdate(userId,
+      { profileImg: "" },
+      { new: true }
+    );
 
+    res.status(200).json({ success: true, user: updatedUser });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ success: false });
+  }
+}
