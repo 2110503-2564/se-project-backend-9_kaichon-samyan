@@ -63,9 +63,9 @@
  */
 
 const express = require('express');
-const { register, login, logout, getMe, updateProfile, changePassword, uploadProfilePic, deleteProfilePic, addUsername, getAllUser } = require('../controllers/auth.controller');
+const { register, login, logout, getMe, updateProfile, changePassword, uploadProfilePic, deleteProfilePic, addUsername, getAllUser, deleteUserPic } = require('../controllers/auth.controller');
 const router = express.Router();
-const { protect } = require('../middlewares/auth.middlware');
+const { protect, authorize } = require('../middlewares/auth.middlware');
 
 /**
  * @swagger
@@ -475,5 +475,62 @@ router.put('/addUsername', protect, addUsername);
  *                   example: false
  */
 router.get('/getAllUser', protect, getAllUser);
+
+/**
+ * @swagger
+ * /auth/deleteUserPic:
+ *   delete:
+ *     summary: Delete user's profile picture (Admin only)
+ *     description: Allows an admin to delete a user's profile picture
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: The ID of the user whose profile picture should be deleted
+ *     responses:
+ *       200:
+ *         description: Profile picture deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: User does not have a profile picture
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: user does not have profile img
+ *       401:
+ *         description: Not authorized - requires admin role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.delete('/deleteUserPic', protect, authorize('admin'), deleteUserPic);
 
 module.exports = router;

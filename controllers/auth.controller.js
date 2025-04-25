@@ -240,8 +240,35 @@ exports.getAllUser = async (req, res) => {
       res.status(200).json({ data: users });
     } catch (error) {
       res.status(400).json({ success: false });
+    }
+  }
+  
+  exports.deleteUserPic = async (req, res) => {
+    try {
+      const userId = req.body;
+      const user = await User.findById(userId);
+
+      if(user.profileImg) {
+        await cloudinary.uploader.destroy(
+          user.profileImg.split("/").pop().split(".")[0]
+        , { invalidate: true });
+      }
+      else {
+        return res.status(400).json({ success: false, message: "user does not have profile img" });
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(userId,
+        { profileImg: "" },
+        { new: true }
+      );
+
+      res.status(200).json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ success: false });
   }
 }
+
 /**
  * @swagger
  * /api/v1/auth/updateProfile:
