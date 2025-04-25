@@ -63,7 +63,7 @@
  */
 
 const express = require('express');
-const { register, login, logout, getMe, updateProfile, changePassword, uploadProfilePic, deleteProfilePic, addUsername } = require('../controllers/auth.controller');
+const { register, login, logout, getMe, updateProfile, changePassword, uploadProfilePic, deleteProfilePic, addUsername, getAllUser } = require('../controllers/auth.controller');
 const router = express.Router();
 const { protect } = require('../middlewares/auth.middlware');
 
@@ -439,5 +439,41 @@ router.delete('/deleteProfilePic', protect, deleteProfilePic);
  *                   description: Error message
  */
 router.put('/addUsername', protect, addUsername);
+
+/**
+ * @swagger
+ * /auth/getAllUser:
+ *   get:
+ *     summary: Get all users
+ *     description: Retrieves a list of all users from the database
+ *     tags:
+ *       - Auth
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: A list of users retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     description: User object
+ *       400:
+ *         description: Failed to retrieve users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ */
+router.get('/getAllUser', protect, getAllUser);
 
 module.exports = router;
