@@ -50,7 +50,10 @@ exports.login = async (req, res) => {
       .json({ success: false, msg: "Please provide email and password" });
   }
 
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({
+    $or: [{ email: email }, { username: email }]
+  }).select("+password");
+
   if (!user) {
     return res.status(400).json({ success: false, msg: "Invalid credentials" });
   }
