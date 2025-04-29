@@ -21,7 +21,7 @@
 						],
 						"type": "text/javascript",
 						"packages": {}
-					} 
+					}
 				}
 			],
 			"request": {
@@ -538,6 +538,52 @@
 						}
 					]
 				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/v1/hotels/:ID/rating/:ratingID",
+					"host": [
+						"http://localhost:5000"
+					],
+					"path": [
+						"api",
+						"v1",
+						"hotels",
+						":ID",
+						"rating",
+						":ratingID"
+					],
+					"variable": [
+						{
+							"key": "ID",
+							"value": "6803644ba3e8084f243e5560"
+						},
+						{
+							"key": "ratingID",
+							"value": "680389e0c03d3f4369d14a1e"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "US2-5(A):Delete Rating ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {

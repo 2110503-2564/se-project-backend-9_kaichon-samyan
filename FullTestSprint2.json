@@ -98,7 +98,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"newUsername\" : \"ThisIsNewUsername\"\n}",
+					"raw": "{\n    \"newUsername\" : \"NineAengJa\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -181,7 +181,7 @@
 			"response": []
 		},
 		{
-			"name": "US1-2.1 : update profile (p)",
+			"name": "update profile (p)",
 			"event": [
 				{
 					"listen": "test",
@@ -241,7 +241,7 @@
 			"response": []
 		},
 		{
-			"name": "US1-2.2 : change password(p)",
+			"name": "US1-2 : change password(p)",
 			"event": [
 				{
 					"listen": "test",
@@ -301,7 +301,7 @@
 			"response": []
 		},
 		{
-			"name": "US1-2.2(A) : change password(p)",
+			"name": "US1-2(A) : change password(p)",
 			"event": [
 				{
 					"listen": "test",
@@ -421,6 +421,66 @@
 			"response": []
 		},
 		{
+			"name": "US1-3(A) , US1-5(A) : Add / Change Profile Pic (p)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": "JSON Type",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"newProfilePic\" : \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/v1/auth/uploadProfilePic",
+					"host": [
+						"http://localhost:5000"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"uploadProfilePic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "US1-4 : View Profile Pic (P)",
 			"event": [
 				{
@@ -465,6 +525,40 @@
 			"response": []
 		},
 		{
+			"name": "US1-4(A) : View Profile Pic (P)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/v1/auth/me",
+					"host": [
+						"http://localhost:5000"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "US1-6 : User Delete User profile pic",
 			"event": [
 				{
@@ -491,6 +585,40 @@
 						}
 					]
 				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/v1/auth/deleteProfilePic",
+					"host": [
+						"http://localhost:5000"
+					],
+					"path": [
+						"api",
+						"v1",
+						"auth",
+						"deleteProfilePic"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "US1-6(A) : User Delete User profile pic",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {
@@ -679,7 +807,7 @@
 			"response": []
 		},
 		{
-			"name": "US1-6 :(Admin) Delete User profile pic (p) Copy",
+			"name": "US1-6(A) :(Admin) Delete User profile pic (p) Copy",
 			"event": [
 				{
 					"listen": "test",
