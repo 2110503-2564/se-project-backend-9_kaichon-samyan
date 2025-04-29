@@ -30,7 +30,7 @@ const app = express();
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 นาที
-  max: 20,                 // จำกัด 20 requests ต่อ IP
+  max: 100,                 // จำกัด 20 requests ต่อ IP
   message: 'คุณส่งคำขอมากเกินไป โปรดลองใหม่ภายหลัง',
   standardHeaders: true,
   legacyHeaders: false,
